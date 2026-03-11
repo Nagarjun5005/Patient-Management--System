@@ -1,0 +1,50 @@
+// Specifies the protobuf version being used.
+// proto3 is the latest and most widely used version.
+syntax = "proto3";
+
+// Specifies the Java package where the generated classes will be placed.
+// This maps to your Spring Boot project's package structure.
+option java_package = "com.pm.billing";
+
+// Generates each message and service as a separate Java file.
+// Without this, everything would be nested inside one outer class.
+option java_multiple_files = true;
+
+// Defines the gRPC service called BillingService.
+// Think of this like a Java interface — it declares what methods are available.
+// Other microservices (like patient-service) can call these methods remotely.
+service BillingService {
+
+  // Defines a single RPC method called CreateBillingAccount.
+  // - Takes a BillingRequest as input
+  // - Returns a BillingResponse as output
+  // This is called by patient-service when a new patient is created
+  // and needs a billing account set up.
+  rpc CreateBillingAccount (BillingRequest) returns (BillingResponse);
+}
+
+// BillingRequest is the INPUT message sent by the caller (patient-service).
+// It contains the minimum info needed to create a billing account.
+message BillingRequest {
+  // The unique ID of the patient (UUID as string).
+  // Field number 1 — protobuf uses numbers not names for serialization (faster).
+  string patientId = 1;
+
+  // Full name of the patient.
+  string name = 2;
+
+  // Email address of the patient.
+  // Used to link the billing account to the patient's contact info.
+  string email = 3;
+}
+
+// BillingResponse is the OUTPUT message returned by billing-service.
+// It confirms the billing account was created successfully.
+message BillingResponse {
+  // The unique ID of the newly created billing account.
+  string accountId = 1;
+
+  // The status of the account creation.
+  // Example values: "ACTIVE", "PENDING", "FAILED"
+  string status = 2;
+}
